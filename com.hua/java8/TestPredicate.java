@@ -6,9 +6,7 @@ public class TestPredicate {
 
 
     public static void main(String[] args) {
-
         Predicate<Integer> predicate = (x) -> x == 5;
-
         method(predicate, 5);
         method(predicate.negate(), 5);
         method(predicate.or((x) -> x == 6), 5);
