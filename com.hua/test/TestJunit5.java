@@ -7,10 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -27,8 +33,43 @@ public class TestJunit5 {
 
         @ParameterizedTest
         @CsvSource(value = {"2, 2", "3, 4", "5,6"})
-        public void test4(int a, int b) {
+        public void test4a(int a, int b) {
             assertTrue(a % 2 == 0 && b != 0);
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {"2, 2, 2", "3, 3, 3", "4,4,4"})
+        public void test4b(int a, int b, int c) {
+            assertTrue(a % 2 == 0 && b != 0 && c > 1);
+        }
+
+        @ParameterizedTest
+        @MethodSource("test4cSource")
+        public void test4c(int a, int b, int c) {
+            assertTrue(a >= 0 && b >= 0 && c >= 0);
+        }
+
+        private static Stream<Arguments> test4cSource() {
+            return Stream.of(
+                    Arguments.of(0, 0, 0),
+                    Arguments.of(8, 8, 8),
+                    Arguments.of(5, 5, 5)
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        public void test4d(int a, int b, int c) {
+            assertTrue(a >= 0 && b >= 0 && c >= 0);
+        }
+
+        // Name match
+        private static Stream<Arguments> test4d() {
+            return Stream.of(
+                    Arguments.of(0, 0, 0),
+                    Arguments.of(8, 8, 8),
+                    Arguments.of(5, 5, 5)
+            );
         }
 
     }
@@ -81,4 +122,23 @@ public class TestJunit5 {
     public void test9() {
         assertTrue(true);
     }
+
+    @Test
+    public void test10() {
+        Instant start = Instant.now();
+        LongStream.range(0, 50000000l).forEach(
+                i -> assertEquals(9, Integer.valueOf("9"), "sync dynamic print message " + i)
+        ); // 1088
+        System.out.println(Duration.between(start, Instant.now()).toMillis());
+    }
+
+    @Test
+    public void test11() {
+        Instant start = Instant.now();
+        LongStream.range(0, 50000000l).forEach(
+                i -> assertEquals(9, Integer.valueOf("9"), () -> "async dynamic print message" + i)
+        ); // 49
+        System.out.println(Duration.between(start, Instant.now()).toMillis());
+    }
+
 }
