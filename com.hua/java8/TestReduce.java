@@ -1,5 +1,6 @@
 package com.hua.java8;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TestReduce {
